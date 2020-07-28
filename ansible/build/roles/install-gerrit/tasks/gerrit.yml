@@ -1,0 +1,127 @@
+- name: 'Install dependecies'
+  apt:
+    name:
+      - openjdk-11-jdk
+      - acl
+    state: present
+    update_cache: true
+
+- name: 'Create download directory'
+  file:
+    path: "/opt/gerrit"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: 'Download gerrit'
+  get_url:
+    url: "https://gerrit-releases.storage.googleapis.com/gerrit-3.2.2.war"
+    dest: "/opt/gerrit/gerrit.war"
+    # sha256sum: "{{ item.sha256sum }}"
+    validate_certs: false
+
+
+- name: 'Create gerrit site'
+  file:
+    path: "/var/lib/gerrit"
+    owner: "gerrit"
+    group: "gerrit"
+    mode: 0755
+    state: directory
+
+- name: 'Create gerrit site'
+  file:
+    path: "/opt/gerrit/plugins"
+    owner: "gerrit"
+    group: "gerrit"
+    mode: 0755
+    state: directory
+
+
+- name: 'Create symlink as gerrit plugins for updates'
+  file:
+    src: '/opt/gerrit/plugins'
+    dest: '/var/lib/gerrit/plugins'
+    owner: 'gerrit'
+    group: 'gerrit'
+    state: link
+
+
+- name: 'Create gerrit config directory'
+  file:
+    path: "/var/lib/gerrit/etc"
+    owner: "gerrit"
+    group: "gerrit"
+    mode: 0755
+    state: directory
+
+
+
+- name: 'Config global gerrit'
+  shell: |
+      git config -f file.txt  httpd.listenUrl "http://localhost:8085/"
+- name: 'Initialize gerrit dir'
+  shell: |
+    java -jar /opt/gerrit/gerrit.war init \
+          --batch \
+          --dev \
+          --no-auto-start \
+          -d /var/lib/gerrit \
+          --install-plugin reviewnotes \
+          --install-plugin replication \
+          --install-plugin download-commands \
+          --install-plugin singleusergroup \
+          --install-plugin commit-message-length-validator
+    git config -f /var/lib/gerrit/etc/gerrit.config  httpd.listenUrl "proxy-https://localhost:8082/"
+    git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpHeader "A-User"
+    git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpEmailHeader "A-Email"
+    git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpDisplaynameHeader "A-Name"
+    git config -f /var/lib/gerrit/etc/gerrit.config  auth.type "HTTP"
+  become: yes
+  become_user: 'gerrit'
+
+- name: 'Install and reindex'
+  shell: |
+      java -jar /opt/gerrit/gerrit.war reindex \
+           -d /var/lib/gerrit
+  become: yes
+  become_user: 'gerrit'
+
+
+- name: 'Setup gerrit service'
+  template:
+    src: "gerrit.service"
+    dest: "/etc/systemd/system/gerrit.service"
+    owner: "root"
+    group: "root"
+  become: true
+
+- name: 'Install additional plugins'
+  get_url:
+    url: "{{ item.url }}/{{ item.name }}"
+    dest: "/opt/gerrit/plugins/{{ item.name }}"
+  with_items: 
+  - url: 'https://gerrit-ci.gerritforge.com/view/Plugins-stable-3.2/job/plugin-events-log-bazel-master-stable-3.2/lastSuccessfulBuild/artifact/bazel-bin/plugins/events-log/'
+    name: 'events-log.jar'
+
+- name: 'Start gerrit'
+  ignore_errors: true
+  service:
+    name: "gerrit.service"
+    state: started
+    enabled: no
+
+- name: 'Check service status'
+  shell: |
+    journalctl -xe 
+    systemctl status gerrit.service
+
+- name: 'List plugins'
+  shell: |
+    ls -la /opt/gerrit/plugins
+  register: plugins_list
+
+- debug:
+    var: plugins_list
+

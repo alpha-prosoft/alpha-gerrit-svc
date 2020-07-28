@@ -1,0 +1,8 @@
+- name: 'Build Jenkins AMI'
+  hosts: localhost
+  tasks:
+  - include_role:
+      name: 'alpha-build-lib/build-ami'
+    vars:
+      installation_roles: 
+      - install-gerrit

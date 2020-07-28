@@ -1,0 +1,9 @@
+- name: 'Build Jenkins AMI'
+  hosts: localhost
+  tasks:
+  - include_role:
+      name: alpha-deploy-lib/deploy-instance
+    vars:
+      settings: 
+        VolumePath: /var/lib/gerrit
+        ServiceAlias: scm

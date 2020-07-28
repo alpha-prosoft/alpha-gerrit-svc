@@ -1,0 +1,15 @@
+- debug:
+    msg: 'Start gerrit installation'
+
+- include_role:
+    name: alpha-build-lib/ami-base
+  vars:
+    user_name: 'gerrit'
+
+- name: 'Copy user config'
+  copy: 
+    src: 'init-userdata.sh'
+    dest: '/etc/init-userdata.sh'
+
+- include_tasks: gerrit.yml
+
