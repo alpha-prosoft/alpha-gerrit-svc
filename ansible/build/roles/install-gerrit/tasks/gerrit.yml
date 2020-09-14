@@ -16,7 +16,7 @@
 
 - name: 'Download gerrit'
   get_url:
-    url: "https://gerrit-releases.storage.googleapis.com/gerrit-3.2.2.war"
+    url: "https://gerrit-releases.storage.googleapis.com/gerrit-3.2.3.war"
     dest: "/opt/gerrit/gerrit.war"
     # sha256sum: "{{ item.sha256sum }}"
     validate_certs: false
