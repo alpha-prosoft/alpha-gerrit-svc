@@ -35,19 +35,19 @@ sudo cat /home/gerrit/.ssh/id_rsa.pub  | \
 
 
 aws ssm get-parameter \
-    --name "/$EnvironmentNameLower/public/build/.ssh/id_rsa.pub" \
+    --name "/$EnvironmentNameLower/public/jenkins/.ssh/id_rsa.pub" \
     --with-decryption \
     --query 'Parameter.Value' \
-    --output text | base64 -d | su gerrit bash -c "tee /home/${Username}/.ssh/build.id_rsa.pub"
+    --output text | base64 -d | su gerrit bash -c "tee /home/${Username}/.ssh/jenkins.id_rsa.pub"
 
 ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 -oStrictHostKeyChecking=no \
             gerrit create-account \
               --group "'Non-Interactive Users'"  \
-              --full-name build  \
-              --email "build@${PrivateHostedZoneName}" build || echo "User exits"
+              --full-name "Jenkins" \
+              --email "jenkins@${PrivateHostedZoneName}" jenkins || echo "User exits"
 
 
-cat /home/${Username}/.ssh/build.id_rsa.pub |
+cat /home/${Username}/.ssh/jenkins.id_rsa.pub |
   ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 \
       gerrit set-account --add-ssh-key - build
 
