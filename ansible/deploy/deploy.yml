@@ -6,4 +6,4 @@
     vars:
       settings: 
         VolumePath: /var/lib/gerrit
-        ServiceAlias: scm
+        ServiceAlias: gerrit

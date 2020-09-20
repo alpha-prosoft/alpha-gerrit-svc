@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:experimental
 ARG BUILD_ID
-ARG PROJECT_NAME=alpha-scm-svc
+ARG PROJECT_NAME=alpha-gerrit-svc
 
 FROM ansible-img:b${BUILD_ID}
 

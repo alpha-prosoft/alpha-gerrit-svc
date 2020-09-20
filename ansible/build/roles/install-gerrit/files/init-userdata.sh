@@ -49,5 +49,5 @@ ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 -oStrictHostKeyChe
 
 cat /home/${Username}/.ssh/jenkins.id_rsa.pub |
   ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 \
-      gerrit set-account --add-ssh-key - build
+      gerrit set-account --add-ssh-key - jenkins
 
