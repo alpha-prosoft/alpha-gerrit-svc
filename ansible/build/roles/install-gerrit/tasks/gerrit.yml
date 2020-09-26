@@ -78,6 +78,8 @@
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpEmailHeader "A-Email"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpDisplaynameHeader "A-Name"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.type "HTTP"
+    git config -f /var/lib/gerrit/etc/gerrit.config  auth.trustContainerAuth = true
+
   become: yes
   become_user: 'gerrit'
 
