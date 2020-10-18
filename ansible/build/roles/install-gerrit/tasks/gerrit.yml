@@ -16,7 +16,7 @@
 
 - name: 'Download gerrit'
   get_url:
-    url: "https://gerrit-releases.storage.googleapis.com/gerrit-3.2.3.war"
+    url: "https://gerrit-releases.storage.googleapis.com/gerrit-3.2.5.1.war"
     dest: "/opt/gerrit/gerrit.war"
     # sha256sum: "{{ item.sha256sum }}"
     validate_certs: false
@@ -39,15 +39,6 @@
     state: directory
 
 
-- name: 'Create symlink as gerrit plugins for updates'
-  file:
-    src: '/opt/gerrit/plugins'
-    dest: '/var/lib/gerrit/plugins'
-    owner: 'gerrit'
-    group: 'gerrit'
-    state: link
-
-
 - name: 'Create gerrit config directory'
   file:
     path: "/var/lib/gerrit/etc"
@@ -55,8 +46,6 @@
     group: "gerrit"
     mode: 0755
     state: directory
-
-
 
 - name: 'Config global gerrit'
   shell: |
@@ -67,19 +56,13 @@
           --batch \
           --dev \
           --no-auto-start \
-          -d /var/lib/gerrit \
-          --install-plugin reviewnotes \
-          --install-plugin replication \
-          --install-plugin download-commands \
-          --install-plugin delete-project \
-          --install-plugin singleusergroup \
-          --install-plugin commit-message-length-validator
+          -d /var/lib/gerrit 
     git config -f /var/lib/gerrit/etc/gerrit.config  httpd.listenUrl "proxy-https://localhost:8082/"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpHeader "A-User"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpEmailHeader "A-Email"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpDisplaynameHeader "A-Name"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.type "HTTP"
-    git config -f /var/lib/gerrit/etc/gerrit.config  auth.trustContainerAuth = true
+    git config -f /var/lib/gerrit/etc/gerrit.config  auth.trustContainerAuth true
 
   become: yes
   become_user: 'gerrit'

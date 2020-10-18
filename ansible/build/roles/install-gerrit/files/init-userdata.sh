@@ -2,6 +2,22 @@
 
 echo "Starting gerrit"
 
+java -jar /opt/gerrit/gerrit.war init \
+          --batch \
+          --dev \
+          --no-auto-start \
+          -d /var/lib/gerrit \
+          --install-plugin reviewnotes \
+          --install-plugin replication \
+          --install-plugin download-commands \
+          --install-plugin delete-project \
+          --install-plugin gitiles \
+          --install-plugin singleusergroup \
+          --install-plugin commit-message-length-validator
+
+cp /opt/gerrit/plugins/* /var/lib/gerrit/plugins/
+chown gerrit:gerrit /var/lib/gerrit/plugins -R
+
 git config -f /var/lib/gerrit/etc/gerrit.config \
        	gerrit.canonicalWebUrl "https://${ServiceAlias}.${PrivateHostedZoneName}"
 
@@ -9,7 +25,7 @@ git config -f /var/lib/gerrit/etc/gerrit.config \
         sendemail.enable false
 
 git config  -f /var/lib/gerrit/etc/gerrit.config \
-       	gerrit.installCommitMsgHookCommand 'curl -b ~/alpha/gitcookie -Lo `git rev-parse --git-dir`/hooks/commit-msg https://'"${ServiceAlias}.${PrivateHostedZoneName}"'/tools/hooks/commit-msg; chmod +x `git rev-parse --git-dir`/hooks/commit-msg'
+       	gerrit.installCommitMsgHookCommand 'curl -b ~/.alpha/gitcookie -Lo `git rev-parse --git-dir`/hooks/commit-msg https://'"${ServiceAlias}.${PrivateHostedZoneName}"'/tools/hooks/commit-msg; chmod +x `git rev-parse --git-dir`/hooks/commit-msg'
 
 systemctl start gerrit
 

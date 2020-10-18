@@ -5,7 +5,7 @@ After=network.target
 [Service]
 EnvironmentFile=/etc/environment
 Type=forking
-User=gerrit
+User=root
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=gerrit
