@@ -71,6 +71,7 @@
           --install-plugin reviewnotes \
           --install-plugin replication \
           --install-plugin download-commands \
+          --install-plugin delete-project \
           --install-plugin singleusergroup \
           --install-plugin commit-message-length-validator
     git config -f /var/lib/gerrit/etc/gerrit.config  httpd.listenUrl "proxy-https://localhost:8082/"
