@@ -16,9 +16,8 @@
 
 - name: 'Download gerrit'
   get_url:
-    url: "https://gerrit-releases.storage.googleapis.com/gerrit-3.2.5.1.war"
+    url: "https://gerrit-releases.storage.googleapis.com/gerrit-3.5.1.war"
     dest: "/opt/gerrit/gerrit.war"
-    # sha256sum: "{{ item.sha256sum }}"
     validate_certs: false
 
 
@@ -88,7 +87,7 @@
     url: "{{ item.url }}/{{ item.name }}"
     dest: "/opt/gerrit/plugins/{{ item.name }}"
   with_items: 
-  - url: 'https://gerrit-ci.gerritforge.com/view/Plugins-stable-3.2/job/plugin-events-log-bazel-master-stable-3.2/lastSuccessfulBuild/artifact/bazel-bin/plugins/events-log/'
+  - url: 'https://gerrit-ci.gerritforge.com/view/Plugins-stable-3.5/job/plugin-events-log-bazel-master-stable-3.5/lastSuccessfulBuild/artifact/bazel-bin/plugins/events-log'
     name: 'events-log.jar'
 
 - name: 'Start gerrit'
