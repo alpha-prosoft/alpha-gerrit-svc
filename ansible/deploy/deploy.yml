@@ -1,5 +1,6 @@
 - name: 'Build Jenkins AMI'
   hosts: localhost
+  connection: local
   tasks:
   - include_role:
       name: alpha-deploy-lib/deploy-instance
