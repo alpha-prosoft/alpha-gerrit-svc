@@ -20,7 +20,7 @@ echo "Deploy build id: $BUILD_ID"
 export AWS_DEFAULT_REGION=$(curl --silent http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
 
 
-curl https://raw.githubusercontent.com/raiffeisenbankinternational/cbd-jenkins-pipeline/master/ext/deploy.sh > deploy.sh
+curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/raiffeisenbankinternational/cbd-jenkins-pipeline/master/ext/deploy.sh > deploy.sh
 chmod +x deploy.sh
 
 docker run -it -v /var/run/docker.sock:/var/run/docker.sock \
