@@ -1,7 +1,7 @@
 - name: 'Install dependecies'
-  apt:
+  yum:
     name:
-      - openjdk-11-jdk
+      - java-17-amazon-corretto-devel
       - acl
     state: present
     update_cache: true
