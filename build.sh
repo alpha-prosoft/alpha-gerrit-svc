@@ -36,7 +36,9 @@ fi
 export BUILD_ID=$((BUILD_ID+1))
 echo "New build id: $BUILD_ID"
 
-      
+mkdir certs
+cp /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors/* certs/
+ 
 docker build --progress=plain \
 	     --no-cache \
 	     --build-arg BUILD_ID="${BUILD_ID}" \
