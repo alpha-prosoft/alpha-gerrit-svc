@@ -39,11 +39,26 @@ echo "New build id: $BUILD_ID"
 mkdir certs
 cp /etc/pki/ca-trust/source/anchors:/etc/pki/ca-trust/source/anchors/* certs/
  
+arg_http_proxy="--build-arg http_proxy=${http_proxy:-}"
+arg_https_proxy="--build-arg https_proxy=${https_proxy:-}"
+arg_no_proxy="--build-arg http_proxy=${no_proxy:-}"
+arg_HTTP_PROXY="--build-arg HTTP_PROXY=${HTTP_PROXY:-}"
+arg_HTTPS_PROXY="--build-arg HTTPS_PROXY=${HTTPS_PROXY:-}"
+arg_NO_PROXY="--build-arg http_proxy=${NO_PROXY:-}"
+
 docker build --progress=plain \
-	     --no-cache \
+             --no-cache \
+             --pull \
 	     --build-arg BUILD_ID="${BUILD_ID}" \
 	     --build-arg BuildId="${BUILD_ID}" \
 	     --build-arg AWS_REGION="${AWS_DEFAULT_REGION}" \
-      	     --build-arg DOCKER_REGISTRY_URL="${DOCKER_REGISTRY_URL}" \
-	     -t alpha-gerrit-svc:b${BUILD_ID} \
+      	     --build-arg AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION}" \
+	     --build-arg DOCKER_REGISTRY_URL="${DOCKER_REGISTRY_URL}" \
+             ${arg_http_proxy} \
+	     ${arg_https_proxy} \
+	     ${arg_no_proxy} \
+	     ${arg_HTTP_PROXY} \
+      	     ${arg_HTTPS_PROXY} \
+	     ${arg_NO_PROXY} \
+             -t alpha-gerrit-svc:b${BUILD_ID} \
 	     -f Dockerfile .
