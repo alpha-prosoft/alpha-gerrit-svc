@@ -1,8 +1,10 @@
 ARG BUILD_ID
 ARG PROJECT_NAME=alpha-gerrit-svc
+ARG AWS_REGION
+ARG AWS_DEFAULT_REGION
+ARG DOCKER_REGISTRY_URL=docker.io
 
-FROM alphaprosoft/ansible-img:latest
+FROM ${DOCKER_REGISTRY_URL}/alphaprosoft/ansible-img:latest
 
 ENV BUILD_ID ${BUILD_ID}
-
 
