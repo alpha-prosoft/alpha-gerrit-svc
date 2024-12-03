@@ -41,10 +41,10 @@ cp /etc/pki/ca-trust/source/anchors/* cert/
  
 arg_http_proxy="--build-arg http_proxy=${http_proxy:-}"
 arg_https_proxy="--build-arg https_proxy=${https_proxy:-}"
-arg_no_proxy="--build-arg http_proxy=${no_proxy:-}"
+arg_no_proxy="--build-arg no_proxy=${no_proxy:-}"
 arg_HTTP_PROXY="--build-arg HTTP_PROXY=${HTTP_PROXY:-}"
 arg_HTTPS_PROXY="--build-arg HTTPS_PROXY=${HTTPS_PROXY:-}"
-arg_NO_PROXY="--build-arg http_proxy=${NO_PROXY:-}"
+arg_NO_PROXY="--build-arg NO_PROXY=${NO_PROXY:-}"
 
 docker build --progress=plain \
              --network=host \
