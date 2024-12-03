@@ -47,6 +47,7 @@ arg_HTTPS_PROXY="--build-arg HTTPS_PROXY=${HTTPS_PROXY:-}"
 arg_NO_PROXY="--build-arg http_proxy=${NO_PROXY:-}"
 
 docker build --progress=plain \
+             --network=host \
              --no-cache \
              --pull \
 	     --build-arg BUILD_ID="${BUILD_ID}" \
