@@ -1,4 +1,4 @@
-- name: 'Build Jenkins AMI'
+- name: 'Build Gerrit AMI'
   hosts: localhost
   connection: local
   tasks:

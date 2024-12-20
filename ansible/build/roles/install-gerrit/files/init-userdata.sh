@@ -70,8 +70,8 @@ for parameter_name in $parameter_names; do \
    ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 -oStrictHostKeyChecking=no \
             gerrit create-account \
               --group "'Non-Interactive Users'"  \
-              --full-name "Jenkins" \
-              --email "${service}@${PrivateHostedZoneName}" jenkins || echo "User exits"
+              --full-name "${service^}" \
+              --email "${service}@${PrivateHostedZoneName}" ${service}{ || echo "User exits"
 
    echo "Updating public key for ${service}"
    cat $key_file |
