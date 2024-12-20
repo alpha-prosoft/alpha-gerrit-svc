@@ -24,25 +24,24 @@ git config -f /var/lib/gerrit/etc/gerrit.config \
 git config -f /var/lib/gerrit/etc/gerrit.config \
         sendemail.enable false
 
-git config  -f /var/lib/gerrit/etc/gerrit.config \
-       	gerrit.installCommitMsgHookCommand 'curl -b ~/.alpha/gitcookie -Lo `git rev-parse --git-dir`/hooks/commit-msg https://'"${ServiceAlias}.${PrivateHostedZoneName}"'/tools/hooks/commit-msg; chmod +x `git rev-parse --git-dir`/hooks/commit-msg'
-
 systemctl start gerrit
 
+echo "Usefull for first login to setup propper admin"
+echo "We configured gerrit to trust A-User header as propper login"
 curl -c cookie.txt http://127.0.0.1:8082/login \
         -H "A-User: admin" \
-        -H "A-Email: admin@local" \
+        -H "A-Email: admin@${PrivateHostedZoneName}" \
         -H "A-Name: Administrator"
 
 # CSRF Token is sent on next request
 curl -c cookie.txt -b cookie.txt http://127.0.0.1:8082/ \
         -H "A-User: admin" \
-        -H "A-Email: admin@local" \
+        -H "A-Email: admin@${PrivateHostedZoneName}" \
         -H "A-Name: Administrator"
 
 auth_token=$(cat cookie.txt  | grep XSRF_TOKEN | awk '{printf $7}')
 
-sudo cat /home/gerrit/.ssh/id_rsa.pub  | \
+sudo cat /home/${Username}/.ssh/id_rsa.pub  | \
          curl --data @- \
          -b cookie.txt  \
          -H "Content-Type: text/plain" \
@@ -50,20 +49,35 @@ sudo cat /home/gerrit/.ssh/id_rsa.pub  | \
          http://127.0.0.1:8082/accounts/self/sshkeys
 
 
-aws ssm get-parameter \
-    --name "/$EnvironmentNameLower/public/jenkins/.ssh/id_rsa.pub" \
-    --with-decryption \
-    --query 'Parameter.Value' \
-    --output text | base64 -d | su gerrit bash -c "tee /home/${Username}/.ssh/jenkins.id_rsa.pub"
-
-ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 -oStrictHostKeyChecking=no \
+echo "Loading custom certificates"
+parameter_names=$(aws ssm get-parameters-by-path \
+                     --path '/${EnvironmentNameLower}/keys/public/' \
+                     --recursive \
+                     --query 'Parameters[*].[Name]' \
+                     --output text)
+for parameter_name in $parameter_names; do \
+   echo "Processing ${parameter_name}"; \
+   param_path="$(dirname ${parameter_name})"
+   service="$(basename ${parameter_name})" 
+   key_file=$(mktemp)
+   echo "Key file $key_file for service ${service}"
+   aws ssm get-parameter \
+     --name ${parameter_name} \
+     --with-decryption \
+     --query 'Parameter.Value' \
+     --output text > $key_file
+   
+   ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 -oStrictHostKeyChecking=no \
             gerrit create-account \
               --group "'Non-Interactive Users'"  \
               --full-name "Jenkins" \
-              --email "jenkins@${PrivateHostedZoneName}" jenkins || echo "User exits"
+              --email "${service}@${PrivateHostedZoneName}" jenkins || echo "User exits"
 
+   echo "Updating public key for ${service}"  
+   cat $key_file |
+     ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 \
+       gerrit set-account --add-ssh-key - ${service}
+   rm -f $key_file
+done
 
-cat /home/${Username}/.ssh/jenkins.id_rsa.pub |
-  ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 \
-      gerrit set-account --add-ssh-key - jenkins
 
