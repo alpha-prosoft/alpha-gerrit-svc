@@ -14,13 +14,6 @@
     group: root
     mode: 0755
 
-- name: 'Download gerrit'
-  get_url:
-    url: "https://gerrit-releases.storage.googleapis.com/gerrit-3.8.3.war"
-    dest: "/opt/gerrit/gerrit.war"
-    validate_certs: false
-
-
 - name: 'Create gerrit site'
   file:
     path: "/var/lib/gerrit"
@@ -37,7 +30,6 @@
     mode: 0755
     state: directory
 
-
 - name: 'Create gerrit config directory'
   file:
     path: "/var/lib/gerrit/etc"
@@ -51,6 +43,10 @@
       git config -f file.txt  httpd.listenUrl "http://localhost:8085/"
 - name: 'Initialize gerrit dir'
   shell: |
+    mkdir -p /opt/gerrit
+    curl -oL /opt/gerrit/gerrit.war \
+          https://gerrit-releases.storage.googleapis.com/gerrit-3.8.3.war
+    
     java -jar /opt/gerrit/gerrit.war init \
           --batch \
           --dev \
