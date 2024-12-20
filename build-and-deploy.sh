@@ -19,5 +19,5 @@ curl -H 'Cache-Control: no-cache' \
 chmod +x ${target_dir}/build.sh
 chmod +x ${target_dir}/run.sh
 
-source ${target_dir}/build.sh ${PROJECT_NAME} "base" "${ENV_NAME_UPPER}"
-source ${target_dir}/run.sh ${PROJECT_NAME} "base" "${ENV_NAME_UPPER}"
+source ${target_dir}/build.sh ${PROJECT_NAME} "gerrit" "${ENV_NAME_UPPER}"
+source ${target_dir}/run.sh ${PROJECT_NAME} "gerrit" "${ENV_NAME_UPPER}"
