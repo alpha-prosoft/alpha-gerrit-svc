@@ -58,7 +58,7 @@ parameter_names=$(aws ssm get-parameters-by-path \
 for parameter_name in $parameter_names; do \
    echo "Processing ${parameter_name}"; \
    param_path="$(dirname ${parameter_name})"
-   service="$(basename ${parameter_name})" 
+   service="$(basename ${parameter_name})"
    key_file=$(mktemp)
    echo "Key file $key_file for service ${service}"
    aws ssm get-parameter \
@@ -66,14 +66,14 @@ for parameter_name in $parameter_names; do \
      --with-decryption \
      --query 'Parameter.Value' \
      --output text > $key_file
-   
+
    ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 -oStrictHostKeyChecking=no \
             gerrit create-account \
               --group "'Non-Interactive Users'"  \
               --full-name "Jenkins" \
               --email "${service}@${PrivateHostedZoneName}" jenkins || echo "User exits"
 
-   echo "Updating public key for ${service}"  
+   echo "Updating public key for ${service}"
    cat $key_file |
      ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 \
        gerrit set-account --add-ssh-key - ${service}
