@@ -74,9 +74,9 @@
   shell: |
     set -euo pipefail
     mkdir -p /var/lib/gerrit/logs
-    touch /var/lib/gerrit/logs/gerrit.pid
-    chmod 744 /var/lib/gerrit/logs/gerrit.pid
-    chown root:root /var/lib/gerrit/logs/gerrit.pid
+    touch /var/lib/gerrit/logs/gerrit.run
+    chmod 744 /var/lib/gerrit/logs/gerrit.run
+    chown root:root /var/lib/gerrit/logs/gerrit.run
   
 - name: 'Install and reindex'
   shell: |
