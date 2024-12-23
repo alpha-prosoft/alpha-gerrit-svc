@@ -39,6 +39,7 @@
     state: directory
 
 - name: 'Download gerrit'
+  environment: '{{ params }}'
   shell: |
     mkdir -p /opt/gerrit
     curl -L -o /opt/gerrit/gerrit.war \
@@ -80,6 +81,7 @@
   become: true
 
 - name: 'Install additional plugins'
+  environment: '{{ params }}'
   get_url:
     url: "{{ item.url }}/{{ item.name }}"
     dest: "/opt/gerrit/plugins/{{ item.name }}"
