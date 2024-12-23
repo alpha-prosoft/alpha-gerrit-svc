@@ -6,12 +6,12 @@ After=network.target
 EnvironmentFile=/etc/environment
 Type=forking
 User=root
-StandardOutput=syslog
-StandardError=syslog
+StandardOutput=journal
+StandardError=journal
 SyslogIdentifier=gerrit
 ExecStart=/var/lib/gerrit/bin/gerrit.sh start
 ExecStop=/var/lib/gerrit/bin/gerrit.sh stop
-PIDFile=/run/gerrit.pid
+PIDFile=/var/lib/gerrit/logs/gerrit.pid
 
 [Install]
 WantedBy=multi-user.target
