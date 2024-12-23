@@ -46,10 +46,6 @@
     curl --fail -L -o /opt/gerrit/gerrit.war \
           https://gerrit-releases.storage.googleapis.com/gerrit-3.8.3.war
     chmod 755 /opt/gerrit/gerrit.war
-    
-    touch /run/gerrit.pid
-    chmod 744 /run/gerrit.pid
-    chown root:root /run/gerrit.pid
 
 - name: 'Initialize gerrit dir'
   environment: '{{ params }}'
@@ -69,9 +65,19 @@
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.type "HTTP"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.trustContainerAuth true
     git config -f /var/lib/gerrit/etc/gerrit.config  container.javaHome "/usr/lib/jvm/java-21-amazon-corretto.x86_64"
+
   become: yes
   become_user: 'gerrit'
 
+- name: 'Cleanup gerrit dir'
+  environment: '{{ params }}'
+  shell: |
+    set -euo pipefail
+    mkdir -p /var/lib/gerrit/logs
+    touch /var/lib/gerrit/logs/gerrit.pid
+    chmod 744 /var/lib/gerrit/logs/gerrit.pid
+    chown root:root /var/lib/gerrit/logs/gerrit.pid
+  
 - name: 'Install and reindex'
   shell: |
       java -jar /opt/gerrit/gerrit.war reindex \
@@ -106,7 +112,7 @@
 
 - name: 'Check service status'
   shell: |
-    journalctl -xe 
+    journalctl -xeu gerrit.service
     systemctl status gerrit.service
 
 - name: 'List plugins'
