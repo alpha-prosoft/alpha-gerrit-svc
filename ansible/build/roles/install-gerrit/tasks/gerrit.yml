@@ -1,7 +1,7 @@
 - name: 'Install dependecies'
   yum:
     name:
-      - java-17-amazon-corretto-devel
+      - java-21-amazon-corretto-devel
       - acl
     state: present
     update_cache: true
@@ -41,12 +41,17 @@
 - name: 'Download gerrit'
   environment: '{{ params }}'
   shell: |
+    set -euo pipefail
     mkdir -p /opt/gerrit
-    curl -L -o /opt/gerrit/gerrit.war \
+    curl --fail -L -o /opt/gerrit/gerrit.war \
           https://gerrit-releases.storage.googleapis.com/gerrit-3.8.3.war
+    chmod 755 /opt/gerrit/gerrit.war
 
 - name: 'Initialize gerrit dir'
+  environment: '{{ params }}'
   shell: |
+    set -euo pipefail
+    
     java -jar /opt/gerrit/gerrit.war init \
           --batch \
           --dev \
@@ -60,7 +65,6 @@
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.type "HTTP"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.trustContainerAuth true
     git config -f /var/lib/gerrit/etc/gerrit.config  container.javaHome "/usr/lib/jvm/java-17-amazon-corretto.x86_64"
-
   become: yes
   become_user: 'gerrit'
 
