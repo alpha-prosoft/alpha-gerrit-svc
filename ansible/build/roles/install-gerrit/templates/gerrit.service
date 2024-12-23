@@ -11,7 +11,7 @@ StandardError=journal
 SyslogIdentifier=gerrit
 ExecStart=/var/lib/gerrit/bin/gerrit.sh start
 ExecStop=/var/lib/gerrit/bin/gerrit.sh stop
-PIDFile=/var/lib/gerrit/logs/gerrit.pid
+PIDFile=/var/lib/gerrit/logs/gerrit.run
 
 [Install]
 WantedBy=multi-user.target
