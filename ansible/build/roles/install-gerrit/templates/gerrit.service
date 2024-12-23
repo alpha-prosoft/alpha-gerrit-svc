@@ -9,10 +9,14 @@ User=root
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=gerrit
-ExecPreStart=rm -f /var/lib/gerrit/logs/gerrit.run
+ExecStartPre=rm -f /var/lib/gerrit/logs/gerrit.pid
 ExecStart=/var/lib/gerrit/bin/gerrit.sh start
 ExecStop=/var/lib/gerrit/bin/gerrit.sh stop
-PIDFile=/var/lib/gerrit/logs/gerrit.run
+ExecStartPost=/bin/sleep 4
+ExecStartPost=/bin/cp /var/lib/gerrit/logs/gerrit.pid /run/gerrit.pid
+ExecStartPost=/bin/chown root:root /run/gerrit.pid
+ExecStartPost=/bin/ls -la /run/gerrit.pid
+PIDFile=/run/gerrit.pid
 
 [Install]
 WantedBy=multi-user.target
