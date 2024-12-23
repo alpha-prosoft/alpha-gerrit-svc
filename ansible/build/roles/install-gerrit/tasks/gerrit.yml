@@ -64,7 +64,7 @@
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpDisplaynameHeader "A-Name"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.type "HTTP"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.trustContainerAuth true
-    git config -f /var/lib/gerrit/etc/gerrit.config  container.javaHome "/usr/lib/jvm/java-17-amazon-corretto.x86_64"
+    git config -f /var/lib/gerrit/etc/gerrit.config  container.javaHome "/usr/lib/jvm/java-21-amazon-corretto.x86_64"
   become: yes
   become_user: 'gerrit'
 
