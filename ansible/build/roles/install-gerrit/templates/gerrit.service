@@ -9,6 +9,7 @@ User=root
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=gerrit
+ExecPreStart=rm -f /var/lib/gerrit/logs/gerrit.run
 ExecStart=/var/lib/gerrit/bin/gerrit.sh start
 ExecStop=/var/lib/gerrit/bin/gerrit.sh stop
 PIDFile=/var/lib/gerrit/logs/gerrit.run
