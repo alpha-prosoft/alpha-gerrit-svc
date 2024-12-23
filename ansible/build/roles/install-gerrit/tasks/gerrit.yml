@@ -38,20 +38,20 @@
     mode: 0755
     state: directory
 
-- name: 'Config global gerrit'
-  shell: |
-      git config -f file.txt  httpd.listenUrl "http://localhost:8085/"
-- name: 'Initialize gerrit dir'
+- name: 'Download gerrit'
   shell: |
     mkdir -p /opt/gerrit
-    curl -oL /opt/gerrit/gerrit.war \
+    curl -L -o /opt/gerrit/gerrit.war \
           https://gerrit-releases.storage.googleapis.com/gerrit-3.8.3.war
-    
+
+- name: 'Initialize gerrit dir'
+  shell: |
     java -jar /opt/gerrit/gerrit.war init \
           --batch \
           --dev \
           --no-auto-start \
           -d /var/lib/gerrit 
+  
     git config -f /var/lib/gerrit/etc/gerrit.config  httpd.listenUrl "proxy-https://localhost:8082/"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpHeader "A-User"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpEmailHeader "A-Email"
