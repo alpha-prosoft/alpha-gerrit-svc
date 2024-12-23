@@ -46,6 +46,10 @@
     curl --fail -L -o /opt/gerrit/gerrit.war \
           https://gerrit-releases.storage.googleapis.com/gerrit-3.8.3.war
     chmod 755 /opt/gerrit/gerrit.war
+    
+    touch /run/gerrit.pid
+    chmod 744 /run/gerrit.pid
+    chown root:root /run/gerrit.pid
 
 - name: 'Initialize gerrit dir'
   environment: '{{ params }}'
