@@ -1,5 +1,7 @@
 #!/bin/bash 
 
+set -euo pipefail 
+
 echo "Starting gerrit"
 
 java -jar /opt/gerrit/gerrit.war init \
@@ -51,10 +53,11 @@ sudo cat /home/${Username}/.ssh/id_rsa.pub  | \
 
 echo "Loading custom certificates"
 parameter_names=$(aws ssm get-parameters-by-path \
-                     --path '/${EnvironmentNameLower}/keys/public/' \
+                     --path "/${EnvironmentNameLower}/keys/public/" \
                      --recursive \
                      --query 'Parameters[*].[Name]' \
                      --output text)
+                     
 for parameter_name in $parameter_names; do \
    echo "Processing ${parameter_name}"; \
    param_path="$(dirname ${parameter_name})"
