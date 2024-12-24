@@ -30,13 +30,13 @@ systemctl start gerrit
 
 echo "Usefull for first login to setup propper admin"
 echo "We configured gerrit to trust A-User header as propper login"
-curl -c cookie.txt http://127.0.0.1:8082/login \
+curl --fail -c cookie.txt http://127.0.0.1:8082/login \
         -H "A-User: admin" \
         -H "A-Email: admin@${PrivateHostedZoneName}" \
         -H "A-Name: Administrator"
 
 # CSRF Token is sent on next request
-curl -c cookie.txt -b cookie.txt http://127.0.0.1:8082/ \
+curl --fail -c cookie.txt -b cookie.txt http://127.0.0.1:8082/ \
         -H "A-User: admin" \
         -H "A-Email: admin@${PrivateHostedZoneName}" \
         -H "A-Name: Administrator"
@@ -44,7 +44,7 @@ curl -c cookie.txt -b cookie.txt http://127.0.0.1:8082/ \
 auth_token=$(cat cookie.txt  | grep XSRF_TOKEN | awk '{printf $7}')
 
 sudo cat /home/${Username}/.ssh/id_rsa.pub  | \
-         curl --data @- \
+         curl --fail  --data @- \
          -b cookie.txt  \
          -H "Content-Type: text/plain" \
          -H "X-Gerrit-Auth: ${auth_token}" \
