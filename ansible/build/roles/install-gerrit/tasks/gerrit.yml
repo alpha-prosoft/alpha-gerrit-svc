@@ -3,6 +3,7 @@
     name:
       - java-21-amazon-corretto-devel
       - acl
+      - gitweb
     state: present
     update_cache: true
 
@@ -57,7 +58,10 @@
           --dev \
           --no-auto-start \
           -d /var/lib/gerrit 
-  
+
+- name: 'Configure gerrit'
+  environment: '{{ params }}'
+  shell: |
     git config -f /var/lib/gerrit/etc/gerrit.config  httpd.listenUrl "proxy-https://localhost:8082/"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpHeader "A-User"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpEmailHeader "A-Email"
@@ -68,15 +72,8 @@
 
   become: yes
   become_user: 'gerrit'
-
-- name: 'Cleanup gerrit dir'
-  environment: '{{ params }}'
-  shell: |
-    set -euo pipefail
-    mkdir -p /var/lib/gerrit/logs
-    rm -f /var/lib/gerrit/logs/gerrit.run
   
-- name: 'Install and reindex'
+- name: 'Reindex gerrit dir'
   shell: |
       java -jar /opt/gerrit/gerrit.war reindex \
            -d /var/lib/gerrit
@@ -112,6 +109,18 @@
   shell: |
     journalctl -xeu gerrit.service
     systemctl status gerrit.service
+
+- name: 'Stop gerrit'
+  ignore_errors: true
+  service:
+    name: "gerrit.service"
+    state: stopped
+    enabled: false
+
+- name: 'Check service status'
+  shell: |
+    echo "Cleanup install logs"
+    rm -f /var/lib/gerrit/logs/*
 
 - name: 'List plugins'
   shell: |
