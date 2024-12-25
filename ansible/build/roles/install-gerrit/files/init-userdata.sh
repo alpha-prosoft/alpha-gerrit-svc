@@ -2,7 +2,13 @@
 
 set -euo pipefail 
 
-echo "Starting gerrit"
+echo "Starting gerrit configuration"
+
+if [[ ! -f /var/lib/gerrit/is-initialized ]]; then
+  echo "Seems like first start so fixing permissions after init just in case"
+  chown gerrit:gerrit /var/lib/gerrit -R
+  touch /var/lib/gerrit/is-initialized
+fi
 
 su - gerrit -s /bin/sh \
   -c "java -jar /opt/gerrit/gerrit.war init \
@@ -21,17 +27,16 @@ su - gerrit -s /bin/sh \
 cp /opt/gerrit/plugins/* /var/lib/gerrit/plugins/
 chown gerrit:gerrit /var/lib/gerrit/plugins -R
 
-if [[ ! -f /var/lib/gerrit/is-initialized ]]; then
-  echo "Seems like first start so fixing permissions after init just in case"
-  chown gerrit:gerrit /var/lib/gerrit -R
-  touch /var/lib/gerrit/is-initialized
-fi
+
 
 git config -f /var/lib/gerrit/etc/gerrit.config \
            gerrit.canonicalWebUrl "https://${ServiceAlias}.${PrivateHostedZoneName}"
 
 git config -f /var/lib/gerrit/etc/gerrit.config \
         sendemail.enable false
+
+echo "Fix permissions for gerrit.config after edit"
+chown gerrit:gerrit /var/lib/gerrit/etc/gerrit.config
 
 systemctl start gerrit
 
