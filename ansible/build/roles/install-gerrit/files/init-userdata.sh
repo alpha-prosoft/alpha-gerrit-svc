@@ -16,6 +16,9 @@ if [[ ! -f /var/lib/gerrit/is-initialized ]]; then
   touch /var/lib/gerrit/is-initialized
 fi
 
+echo "Fix permissions for gerrit.config before edit"
+chown gerrit:gerrit /var/lib/gerrit/etc/gerrit.config
+
 su - gerrit -s /bin/sh \
   -c "java -jar /opt/gerrit/gerrit.war init \
            --batch \
@@ -41,8 +44,7 @@ git config -f /var/lib/gerrit/etc/gerrit.config \
 git config -f /var/lib/gerrit/etc/gerrit.config \
         sendemail.enable false
 
-echo "Fix permissions for gerrit.config after edit"
-chown gerrit:gerrit /var/lib/gerrit/etc/gerrit.config
+ls -la /var/lib/gerrit/etc/gerrit.config
 
 systemctl start gerrit
 
