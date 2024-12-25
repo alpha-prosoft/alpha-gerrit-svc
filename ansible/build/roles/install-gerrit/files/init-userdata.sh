@@ -14,6 +14,7 @@ if [[ ! -f /var/lib/gerrit/is-initialized ]]; then
   echo "Seems like first start so fixing permissions after init just in case"
   chown gerrit:gerrit /var/lib/gerrit -R
   touch /var/lib/gerrit/is-initialized
+  chown gerrit:gerrit /var/lib/gerrit/is-initialized
 fi
 
 echo "Fix permissions for gerrit.config before edit"
