@@ -2,7 +2,13 @@
 
 set -euo pipefail 
 
-echo "Starting gerrit configuration"
+echo "Starting gerrit startup"
+
+echo "###########################################"
+echo "We will be extra permission chaging here!"
+echo "because we had bugs and sometimes happened that files had wrong permission"
+echo "So for existing instalations we will fix permissions and for new ones"
+echo "we will make sure that gerrit owns all files"
 
 if [[ ! -f /var/lib/gerrit/is-initialized ]]; then
   echo "Seems like first start so fixing permissions after init just in case"
