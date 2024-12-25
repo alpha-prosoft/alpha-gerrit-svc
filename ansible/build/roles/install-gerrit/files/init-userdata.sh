@@ -38,11 +38,11 @@ chown gerrit:gerrit /var/lib/gerrit/plugins -R
 
 
 
-git config -f /var/lib/gerrit/etc/gerrit.config \
-           gerrit.canonicalWebUrl "https://${ServiceAlias}.${PrivateHostedZoneName}"
+su - gerrit -s "git config -f /var/lib/gerrit/etc/gerrit.config \
+                   gerrit.canonicalWebUrl \"https://${ServiceAlias}.${PrivateHostedZoneName}\""
 
-git config -f /var/lib/gerrit/etc/gerrit.config \
-        sendemail.enable false
+su - gerrit -s "git config -f /var/lib/gerrit/etc/gerrit.config \
+                   sendemail.enable false"
 
 ls -la /var/lib/gerrit/etc/gerrit.config
 
