@@ -4,24 +4,31 @@ set -euo pipefail
 
 echo "Starting gerrit"
 
-java -jar /opt/gerrit/gerrit.war init \
-          --batch \
-          --dev \
-          --no-auto-start \
-          -d /var/lib/gerrit \
-          --install-plugin reviewnotes \
-          --install-plugin replication \
-          --install-plugin download-commands \
-          --install-plugin delete-project \
-          --install-plugin gitiles \
-          --install-plugin singleusergroup \
-          --install-plugin commit-message-length-validator
+su - gerrit -s /bin/sh \
+  -c "java -jar /opt/gerrit/gerrit.war init \
+           --batch \
+           --dev \
+           --no-auto-start \
+           -d /var/lib/gerrit \
+           --install-plugin reviewnotes \
+           --install-plugin replication \
+           --install-plugin download-commands \
+           --install-plugin delete-project \
+           --install-plugin gitiles \
+           --install-plugin singleusergroup \
+           --install-plugin commit-message-length-validator"
 
 cp /opt/gerrit/plugins/* /var/lib/gerrit/plugins/
 chown gerrit:gerrit /var/lib/gerrit/plugins -R
 
+if [[ ! -f /var/lib/gerrit/is-initialized ]]; then
+  echo "Seems like first start so fixing permissions after init just in case"
+  chown gerrit:gerrit /var/lib/gerrit -R
+  touch /var/lib/gerrit/is-initialized
+fi
+
 git config -f /var/lib/gerrit/etc/gerrit.config \
-       	gerrit.canonicalWebUrl "https://${ServiceAlias}.${PrivateHostedZoneName}"
+           gerrit.canonicalWebUrl "https://${ServiceAlias}.${PrivateHostedZoneName}"
 
 git config -f /var/lib/gerrit/etc/gerrit.config \
         sendemail.enable false
