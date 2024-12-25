@@ -58,6 +58,8 @@
           --dev \
           --no-auto-start \
           -d /var/lib/gerrit 
+  become: yes
+  become_user: 'gerrit'
 
 - name: 'Configure gerrit'
   environment: '{{ params }}'
@@ -69,7 +71,6 @@
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.type "HTTP"
     git config -f /var/lib/gerrit/etc/gerrit.config  auth.trustContainerAuth true
     git config -f /var/lib/gerrit/etc/gerrit.config  container.javaHome "/usr/lib/jvm/java-21-amazon-corretto.x86_64"
-
   become: yes
   become_user: 'gerrit'
   
