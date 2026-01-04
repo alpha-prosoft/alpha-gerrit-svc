@@ -45,7 +45,7 @@
     set -euo pipefail
     mkdir -p /opt/gerrit
     curl --fail -L -o /opt/gerrit/gerrit.war \
-          https://gerrit-releases.storage.googleapis.com/gerrit-3.8.3.war
+          https://gerrit-releases.storage.googleapis.com/gerrit-3.13.1.war
     chmod 755 /opt/gerrit/gerrit.war
 
 - name: 'Initialize gerrit dir'
