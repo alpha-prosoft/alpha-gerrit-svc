@@ -106,10 +106,11 @@
     state: started
     enabled: no
 
-- name: 'Check service status'
+- name: 'Check service status (informational)'
   shell: |
-    journalctl -xeu gerrit.service
-    systemctl status gerrit.service
+    journalctl -xeu gerrit.service || true
+    systemctl status gerrit.service || true
+  changed_when: false
 
 - name: 'Stop gerrit'
   ignore_errors: true

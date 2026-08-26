@@ -1,3 +1,4 @@
 .idea
 target
 cert
+ansible/build/aws-creds.json

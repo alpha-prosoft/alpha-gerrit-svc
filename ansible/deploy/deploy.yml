@@ -1,4 +1,4 @@
-- name: 'Build Gerrit AMI'
+- name: 'Deploy Gerrit instance'
   hosts: localhost
   connection: local
   tasks:
