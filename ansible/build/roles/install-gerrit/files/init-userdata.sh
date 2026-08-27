@@ -47,58 +47,64 @@ su - gerrit -s /bin/sh \
 
 ls -la /var/lib/gerrit/etc/gerrit.config
 
-systemctl start gerrit
+echo "Configuring Cognito OAuth authentication"
+CLIENT_ID=$(jq -r '.AuthUserPoolClientId' /etc/environment.json)
+CLIENT_SECRET=$(jq -r '.AuthUserPoolClientSecret' /etc/environment.json)
+ROOT_URL="https://${AuthUserPoolDomain}"
 
-echo "Usefull for first login to setup propper admin"
-echo "We configured gerrit to trust A-User header as propper login"
-curl --fail -c cookie.txt http://127.0.0.1:8082/login \
-  -H "A-User: admin" \
-  -H "A-Email: admin@${PrivateHostedZoneName}" \
-  -H "A-Name: Administrator"
+gc() { su - gerrit -s /bin/sh -c "git config -f /var/lib/gerrit/etc/gerrit.config $*"; }
+gc auth.type OAUTH
+gc --unset-all auth.httpHeader || true
+gc --unset-all auth.httpEmailHeader || true
+gc --unset-all auth.httpDisplaynameHeader || true
+gc --unset-all auth.trustContainerAuth || true
+gc "plugin.gerrit-oauth-provider-cognito-oauth.root-url" "${ROOT_URL}"
+gc "plugin.gerrit-oauth-provider-cognito-oauth.client-id" "${CLIENT_ID}"
+gc "plugin.gerrit-oauth-provider-cognito-oauth.client-secret" "${CLIENT_SECRET}"
+gc "plugin.gerrit-oauth-provider-cognito-oauth.link-to-existing-gerrit-accounts" "true"
 
-# CSRF Token is sent on next request
-curl --fail -c cookie.txt -b cookie.txt http://127.0.0.1:8082/ \
-  -H "A-User: admin" \
-  -H "A-Email: admin@${PrivateHostedZoneName}" \
-  -H "A-Name: Administrator"
+systemctl restart gerrit
 
-auth_token=$(cat cookie.txt | grep XSRF_TOKEN | awk '{printf $7}')
-
-sudo cat /home/${Username}/.ssh/id_rsa.pub |
-  curl --fail --data @- \
-    -b cookie.txt \
-    -H "Content-Type: text/plain" \
-    -H "X-Gerrit-Auth: ${auth_token}" \
-    http://127.0.0.1:8082/accounts/self/sshkeys
-
-echo "Loading custom certificates"
-parameter_names=$(aws ssm get-parameters-by-path \
-  --path "/${EnvironmentNameLower}/keys/public/" \
-  --recursive \
-  --query 'Parameters[*].[Name]' \
-  --output text)
-
-for parameter_name in $parameter_names; do
-  echo "Processing ${parameter_name}"
-  param_path="$(dirname ${parameter_name})"
-  service="$(basename ${param_path})"
-  key_file=$(mktemp)
-  echo "Key file $key_file for service ${service}"
-  aws ssm get-parameter \
-    --name ${parameter_name} \
-    --with-decryption \
-    --query 'Parameter.Value' \
-    --output text >$key_file
-
-  ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 -oStrictHostKeyChecking=no \
-    gerrit create-account \
-    --group "'Service Users'" \
-    --full-name "${service^}" \
-    --email "${service}@${PrivateHostedZoneName}" ${service} || echo "User exits"
-
-  echo "Updating public key for ${service}"
-  cat $key_file |
-    ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 \
-      gerrit set-account --add-ssh-key - ${service}
-  rm -f $key_file
+echo "Waiting for gerrit SSH endpoint"
+for i in $(seq 1 30); do
+  ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 -oStrictHostKeyChecking=no -oConnectTimeout=5 \
+    gerrit version && break
+  echo "gerrit not ready yet ($i)"; sleep 5
 done
+
+if ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 -oStrictHostKeyChecking=no gerrit version; then
+  echo "Admin SSH available - provisioning service users from SSM public keys"
+  parameter_names=$(aws ssm get-parameters-by-path \
+    --path "/${EnvironmentNameLower}/keys/public/" \
+    --recursive \
+    --query 'Parameters[*].[Name]' \
+    --output text)
+
+  for parameter_name in $parameter_names; do
+    echo "Processing ${parameter_name}"
+    param_path="$(dirname ${parameter_name})"
+    service="$(basename ${param_path})"
+    key_file=$(mktemp)
+    echo "Key file $key_file for service ${service}"
+    aws ssm get-parameter \
+      --name ${parameter_name} \
+      --with-decryption \
+      --query 'Parameter.Value' \
+      --output text >$key_file
+
+    ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 -oStrictHostKeyChecking=no \
+      gerrit create-account \
+      --group "'Service Users'" \
+      --full-name "${service^}" \
+      --email "${service}@${PrivateHostedZoneName}" ${service} || echo "User exists"
+
+    echo "Updating public key for ${service}"
+    cat $key_file |
+      ssh -i /home/${Username}/.ssh/id_rsa admin@127.0.0.1 -p 29418 \
+        gerrit set-account --add-ssh-key - ${service} || echo "Key already set for ${service}"
+    rm -f $key_file
+  done
+else
+  echo "WARNING: admin SSH not available on this volume."
+  echo "First human Cognito login will create a regular account; promote it to Administrators via the admin SSH key."
+fi

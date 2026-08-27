@@ -65,11 +65,7 @@
   environment: '{{ params }}'
   shell: |
     git config -f /var/lib/gerrit/etc/gerrit.config  httpd.listenUrl "proxy-https://localhost:8082/"
-    git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpHeader "A-User"
-    git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpEmailHeader "A-Email"
-    git config -f /var/lib/gerrit/etc/gerrit.config  auth.httpDisplaynameHeader "A-Name"
-    git config -f /var/lib/gerrit/etc/gerrit.config  auth.type "HTTP"
-    git config -f /var/lib/gerrit/etc/gerrit.config  auth.trustContainerAuth true
+    git config -f /var/lib/gerrit/etc/gerrit.config  auth.type "OAUTH"
     git config -f /var/lib/gerrit/etc/gerrit.config  container.javaHome "/usr/lib/jvm/java-21-amazon-corretto.x86_64"
   become: yes
   become_user: 'gerrit'
@@ -93,11 +89,15 @@
 - name: 'Install additional plugins'
   environment: '{{ params }}'
   get_url:
-    url: "{{ item.url }}/{{ item.name }}"
+    url: "{{ item.url }}"
     dest: "/opt/gerrit/plugins/{{ item.name }}"
   with_items: 
-  - url: 'https://gerrit-ci.gerritforge.com/job/plugin-events-log-bazel-master-stable-3.8/lastSuccessfulBuild/artifact/bazel-bin/plugins/events-log'
+  - url: 'https://gerrit-ci.gerritforge.com/job/plugin-events-log-bazel-master-stable-3.14/lastSuccessfulBuild/artifact/bazel-bin/plugins/events-log/events-log.jar'
     name: 'events-log.jar'
+  - url: 'https://gerrit-ci.gerritforge.com/job/plugin-oauth-bazel-stable-3.14/lastSuccessfulBuild/artifact/bazel-bin/plugins/oauth/oauth.jar'
+    name: 'gerrit-oauth-provider.jar'
+  - url: 'https://gerrit-ci.gerritforge.com/job/plugin-login-redirect-bazel-stable-3.14/lastSuccessfulBuild/artifact/bazel-bin/plugins/login-redirect/login-redirect.jar'
+    name: 'login-redirect.jar'
 
 - name: 'Start gerrit'
   ignore_errors: true
